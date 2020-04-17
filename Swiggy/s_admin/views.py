@@ -1,8 +1,8 @@
 from django.shortcuts import render,redirect
-
 from django.contrib import messages
 from s_admin.forms import *
 from s_admin.models import *
+from restaurant.models import RestaurantModel
 
 def admin_login(request):
     return render(request,"s_admin/login.html")
@@ -64,7 +64,7 @@ def delete_state(request):
 
 
 def open_city(request):
-    return render(request,'s_admin/open_city.html',{"sf":CityForm(),"cdata":CityModel.objects.all()})
+    return render(request,'s_admin/open_city.html',{"sf":CityForm(),"sdata":CityModel.objects.all()})
 
 
 def save_city(request):
@@ -77,26 +77,19 @@ def save_city(request):
 
 
 def update_city(request):
-    cno=request.GET.get('cno')
-    cname=request.GET.get('cname')
-    d1={'cno':cno,'cname':cname}
-    return render(request,"s_admin/open_city.html",{"update_data":d1,"cdata":CityModel.objects.all()})
+    return None
 
 
 def update_city_data(request):
-    cno=request.POST.get("c1")
-    cname=request.POST.get("c2")
-    CityModel.objects.filter(city_no=cno).update(city_name=cname)
-    return redirect('open_city')
+    return None
+
 
 def delete_city(request):
-        cno=request.GET.get('cno')
-        CityModel.objects.filter(city_no=cno).delete()
-        return redirect('open_city')
+    return None
 
 
 def open_area(request):
-    return render(request, 's_admin/open_area.html', {"sf": AreaForm(), "adata": AreaModel.objects.all()})
+    return render(request, 's_admin/open_area.html', {"sf": AreaForm(), "sdata": AreaModel.objects.all()})
 
 
 def save_area(request):
@@ -106,25 +99,6 @@ def save_area(request):
         return redirect('open_area')
     else:
         return render(request, "s_admin/open_area.html", {"sf": sf})
-
-
-def update_area(request):
-    ano=request.GET.get('ano')
-    aname=request.GET.get('aname')
-    d1={"ano":ano,"aname":aname}
-    return render(request,'s_admin/open_area.html',{'update_data':d1,'adata':AreaModel.objects.all()})
-
-def update_area_data(request):
-    ano=request.POST.get('s1')
-    aname=request.POST.get('s2')
-    AreaModel.objects.filter(area_no=ano).update(area_name=aname)
-    return redirect('open_area')
-
-def delete_area(request):
-    ano=request.GET.get('ano')
-    AreaModel.objects.filter(area_no=ano).delete()
-    return redirect('open_area')
-
 
 
 def open_type(request):
@@ -139,20 +113,29 @@ def save_type(request):
     else:
         return render(request, "s_admin/open_type.html", {"sf": sf})
 
-def update_type(request):
-    no=request.GET.get('no')
-    tname=request.GET.get('tname')
-    d1={"no":no,"tname":tname}
-    return render(request,'s_admin/open_type.html',{'update_data':d1,'sdata':RestaurantTypeModel.objects.all()})
 
-def update_type_data(request):
-    no=request.POST.get('s1')
-    tname=request.POST.get('s2')
-    RestaurantTypeModel.objects.filter(no=no).update(type_name=tname)
-    return redirect('open_type')
+def pending_res(request):
+    rs = RestaurantModel.objects.filter(restro_status='pending')
+    return render(request,"s_admin/pending_res.html",{"data":rs})
 
 
-def delete_type(request):
-    no=request.GET.get('no')
-    RestaurantTypeModel.objects.filter(no=no).delete()
-    return redirect('open_type')
+def approve_res(request):
+    rno = request.GET.get("rno")
+    RestaurantModel.objects.filter(restro_id=rno).update(restro_status='approved')
+    return redirect('admin_home')
+
+
+def cancel_res(request):
+    rno = request.GET.get("rno")
+    RestaurantModel.objects.filter(restro_id=rno).update(restro_status='cancel')
+    return redirect('admin_home')
+
+
+def show_approved_res(request):
+    rs = RestaurantModel.objects.filter(restro_status='approved')
+    return render(request, "s_admin/approved_res.html", {"data": rs})
+
+
+def show_cancel_res(request):
+    rs = RestaurantModel.objects.filter(restro_status='cancel')
+    return render(request, "s_admin/cancel_res.html", {"data": rs})
